@@ -361,39 +361,41 @@ export class SpriteSceneComponent implements ISceneComponent {
     private _pointerDown(unTranslatedPointerX: number, unTranslatedPointerY: number, pickResult: Nullable<PickingInfo>, evt: IPointerEvent): Nullable<PickingInfo> {
         const scene = this.scene;
         scene._pickedDownSprite = null;
+        let spritePickResult: Nullable<PickingInfo> = null;
         if (scene.spriteManagers && scene.spriteManagers.length > 0) {
-            pickResult = scene.pickSprite(unTranslatedPointerX, unTranslatedPointerY, this._spritePredicate, false, scene.cameraToUseForPointers || undefined);
+            spritePickResult = scene.pickSprite(unTranslatedPointerX, unTranslatedPointerY, this._spritePredicate, false, scene.cameraToUseForPointers || undefined);
 
-            if (pickResult && pickResult.hit && pickResult.pickedSprite) {
-                if (pickResult.pickedSprite.actionManager) {
-                    scene._pickedDownSprite = pickResult.pickedSprite;
+            if (spritePickResult && spritePickResult.hit && spritePickResult.pickedSprite && (!pickResult?.pickedMesh || spritePickResult.distance < pickResult?.distance)) {
+                if (spritePickResult.pickedSprite.actionManager) {
+                    scene._pickedDownSprite = spritePickResult.pickedSprite;
                     switch (evt.button) {
                         case 0:
-                            pickResult.pickedSprite.actionManager.processTrigger(
+                            spritePickResult.pickedSprite.actionManager.processTrigger(
                                 Constants.ACTION_OnLeftPickTrigger,
-                                ActionEvent.CreateNewFromSprite(pickResult.pickedSprite, scene, evt)
+                                ActionEvent.CreateNewFromSprite(spritePickResult.pickedSprite, scene, evt)
                             );
                             break;
                         case 1:
-                            pickResult.pickedSprite.actionManager.processTrigger(
+                            spritePickResult.pickedSprite.actionManager.processTrigger(
                                 Constants.ACTION_OnCenterPickTrigger,
-                                ActionEvent.CreateNewFromSprite(pickResult.pickedSprite, scene, evt)
+                                ActionEvent.CreateNewFromSprite(spritePickResult.pickedSprite, scene, evt)
                             );
                             break;
                         case 2:
-                            pickResult.pickedSprite.actionManager.processTrigger(
+                            spritePickResult.pickedSprite.actionManager.processTrigger(
                                 Constants.ACTION_OnRightPickTrigger,
-                                ActionEvent.CreateNewFromSprite(pickResult.pickedSprite, scene, evt)
+                                ActionEvent.CreateNewFromSprite(spritePickResult.pickedSprite, scene, evt)
                             );
                             break;
                     }
-                    if (pickResult.pickedSprite.actionManager) {
-                        pickResult.pickedSprite.actionManager.processTrigger(
+                    if (spritePickResult.pickedSprite.actionManager) {
+                        spritePickResult.pickedSprite.actionManager.processTrigger(
                             Constants.ACTION_OnPickDownTrigger,
-                            ActionEvent.CreateNewFromSprite(pickResult.pickedSprite, scene, evt)
+                            ActionEvent.CreateNewFromSprite(spritePickResult.pickedSprite, scene, evt)
                         );
                     }
                 }
+                return spritePickResult;
             }
         }
 

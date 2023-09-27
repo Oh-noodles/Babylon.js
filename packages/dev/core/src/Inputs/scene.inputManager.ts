@@ -372,6 +372,9 @@ export class InputManager {
 
     private _processPointerDown(pickResult: Nullable<PickingInfo>, evt: IPointerEvent): void {
         const scene = this._scene;
+        for (const step of scene._pointerDownStage) {
+            pickResult = step.action(this._unTranslatedPointerX, this._unTranslatedPointerY, pickResult, evt, false);
+        }
         if (pickResult?.pickedMesh) {
             this._pickedDownMesh = pickResult.pickedMesh;
             const actionManager = pickResult.pickedMesh._getActionManagerForTrigger();
@@ -417,10 +420,6 @@ export class InputManager {
                         }
                     }, InputManager.LongPressDelay);
                 }
-            }
-        } else {
-            for (const step of scene._pointerDownStage) {
-                pickResult = step.action(this._unTranslatedPointerX, this._unTranslatedPointerY, pickResult, evt, false);
             }
         }
 
